@@ -100,3 +100,5 @@ LLM/
 ---
 
 Se tiver dúvidas, abra uma issue ou entre em contato! 
+
+docker-compose up --build 
