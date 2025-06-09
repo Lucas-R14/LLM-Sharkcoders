@@ -1,16 +1,59 @@
-from flask import Flask, request, jsonify, render_template, Response
+from flask import Flask, request, jsonify, render_template, Response, redirect, url_for
 from flask_cors import CORS
 import requests
 import json
+from flask_login import LoginManager, current_user
+from app.models.user import db, User
+from app.controllers.auth import auth
+import os
 
 app = Flask(__name__)
 CORS(app)
 
 OLLAMA_API_URL = "http://localhost:11434/api/generate"
 
+def create_app():
+    # Configuration
+    app.config['SECRET_KEY'] = os.urandom(24)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+    # Initialize extensions
+    db.init_app(app)
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
+    # Register blueprints
+    app.register_blueprint(auth)
+
+    # Create database tables
+    with app.app_context():
+        db.create_all()
+
+    return app
+
 @app.route('/')
-def home():
+def index():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
     return render_template('index.html')
+
+@app.route('/chat')
+def chat_page():
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    return render_template('chat.html', username=current_user.username)
+
+@app.route('/dashboard')
+def dashboard():
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    return render_template('dashboard.html', username=current_user.username)
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
@@ -43,4 +86,5 @@ def chat():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+    app = create_app()
     app.run(debug=True) 
