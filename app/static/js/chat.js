@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
         messageDiv.appendChild(bubble);
         chatBox.appendChild(messageDiv);
         chatBox.scrollTop = chatBox.scrollHeight;
+        return bubble;
     }
 
     chatForm.addEventListener('submit', function (e) {
@@ -32,20 +33,21 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!response.body) return;
             const reader = response.body.getReader();
             let aiMessage = '';
+            // Cria o balão da IA uma vez
+            const aiBubble = appendMessage('ai', '');
             function read() {
                 reader.read().then(({ done, value }) => {
                     if (done) {
-                        if (aiMessage) appendMessage('ai', aiMessage);
+                        aiBubble.textContent = aiMessage;
                         return;
                     }
                     const chunk = new TextDecoder().decode(value);
                     aiMessage += chunk.replace(/^data: /gm, '');
-                    chatBox.querySelector('.chat-message.ai:last-child .chat-bubble')?.remove();
-                    appendMessage('ai', aiMessage);
+                    aiBubble.textContent = aiMessage;
+                    chatBox.scrollTop = chatBox.scrollHeight;
                     read();
                 });
             }
-            appendMessage('ai', ''); // Placeholder for streaming
             read();
         });
     });

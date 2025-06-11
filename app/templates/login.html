@@ -3,38 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login - AI Platform</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-robot"></i>
+                <span>AI Platform</span>
+            </div>
+            <div class="nav-menu">
+                <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+                <a href="{{ url_for('auth.register') }}" class="nav-btn">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
         <div class="login-form">
-            <h2>Login</h2>
+            <h2><i class="fas fa-sign-in-alt"></i> Welcome Back</h2>
             {% with messages = get_flashed_messages() %}
                 {% if messages %}
-                    <div class="alert">
+                    <div class="alert-floating">
+                        <i class="fas fa-exclamation-triangle"></i>
                         {{ messages[0] }}
                     </div>
                 {% endif %}
             {% endwith %}
             <form method="POST" action="{{ url_for('auth.login') }}">
                 <div class="form-group">
-                    <label for="username">Username</label>
+                    <label for="username"><i class="fas fa-user"></i> Username</label>
                     <input type="text" id="username" name="username" required>
                 </div>
                 <div class="form-group">
-                    <label for="password">Password</label>
+                    <label for="password"><i class="fas fa-lock"></i> Password</label>
                     <input type="password" id="password" name="password" required>
                 </div>
                 <div class="form-group">
-                    <label>
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
                         <input type="checkbox" name="remember"> Remember me
                     </label>
                 </div>
-                <button type="submit">Login</button>
+                <button type="submit">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Login
+                </button>
             </form>
             <p class="register-link">
-                Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a>
+                Don't have an account? <a href="{{ url_for('auth.register') }}">Create one here</a>
             </p>
         </div>
     </div>

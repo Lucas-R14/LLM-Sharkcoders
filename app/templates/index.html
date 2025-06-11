@@ -3,28 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome</title>
+    <title>AI Platform</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="landing-container">
-        <div class="welcome-box">
-            <h1>Welcome to Our Platform</h1>
-            <p class="subtitle">Join us today and start your journey</p>
-            
-            <div class="auth-buttons">
-                <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login</a>
-                <a href="{{ url_for('auth.register') }}" class="btn btn-secondary">Sign Up</a>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-robot"></i>
+                <span>AI Platform</span>
             </div>
-
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    <div class="alert">
-                        {{ messages[0] }}
-                    </div>
-                {% endif %}
-            {% endwith %}
+            <div class="nav-menu">
+                <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
+                <a href="{{ url_for('auth.register') }}" class="nav-btn">Sign Up</a>
+            </div>
         </div>
-    </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">Welcome to the Future of AI</h1>
+                <p class="hero-subtitle">Experience the power of artificial intelligence with our advanced chat platform. Join thousands of users already transforming their workflow.</p>
+                <div class="hero-buttons">
+                    <a href="{{ url_for('auth.register') }}" class="btn-hero btn-primary">
+                        <i class="fas fa-rocket"></i>
+                        Get Started Free
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn-hero btn-secondary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Sign In
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="floating-card">
+                    <i class="fas fa-comments"></i>
+                    <h3>AI Chat Assistant</h3>
+                    <p>Intelligent conversations powered by advanced AI</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="features-container">
+            <h2>Why Choose Our Platform?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>Smart AI</h3>
+                    <p>Advanced language models for intelligent conversations</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Secure</h3>
+                    <p>Your data is protected with enterprise-grade security</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-bolt"></i>
+                    <h3>Fast</h3>
+                    <p>Lightning-fast responses for seamless interaction</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert-floating">
+                <i class="fas fa-info-circle"></i>
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+    {% endwith %}
+
 </body>
 </html> 
