@@ -1,13 +1,124 @@
 version: '3.8'
 
 services:
-  web:
+  # Enhanced Flask Application
+  app:
     build: .
     ports:
       - "5000:5000"
-    volumes:
-      - .:/app
     environment:
       - FLASK_ENV=development
-      - FLASK_APP=app.py
-    restart: unless-stopped 
+      - DATABASE_URL=sqlite:///app/data/enhanced_users.db
+      - REDIS_URL=redis://redis:6379/0
+      - LITELLM_BASE_URL=http://litellm:4000
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - ./app/data:/app/data
+      - ./config.env:/app/.env
+    depends_on:
+      - redis
+      - litellm
+      - ollama
+    networks:
+      - ai-network
+    restart: unless-stopped
+
+  # LiteLLM Proxy for Multiple AI Providers
+  litellm:
+    image: ghcr.io/berriai/litellm:main-latest
+    ports:
+      - "4000:4000"
+    environment:
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:-sk-1234567890abcdef}
+      - LITELLM_SALT_KEY=${LITELLM_SALT_KEY:-sk-salt1234567890}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    volumes:
+      - ./litellm_config.yaml:/app/config.yaml
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    networks:
+      - ai-network
+    restart: unless-stopped
+
+  # Ollama for Local Models
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_ORIGINS=*
+    networks:
+      - ai-network
+    restart: unless-stopped
+    # Uncomment if you have NVIDIA GPU
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  # Redis for Caching and Rate Limiting
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - ai-network
+    restart: unless-stopped
+
+  # Optional: Nginx for Load Balancing (Production)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - app
+    networks:
+      - ai-network
+    restart: unless-stopped
+    profiles:
+      - production
+
+  # Optional: Database Backup Service
+  db-backup:
+    image: alpine:latest
+    volumes:
+      - ./app/data:/data
+      - ./backups:/backups
+    command: |
+      sh -c "
+      while true; do
+        echo 'Creating database backup...'
+        cp /data/enhanced_users.db /backups/backup_$$(date +%Y%m%d_%H%M%S).db
+        find /backups -name 'backup_*.db' -mtime +7 -delete
+        sleep 86400
+      done
+      "
+    networks:
+      - ai-network
+    restart: unless-stopped
+    profiles:
+      - backup
+
+volumes:
+  ollama_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  ai-network:
+    driver: bridge 
