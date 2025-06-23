@@ -55,13 +55,72 @@ services:
       - ai-network
     restart: unless-stopped
     # Uncomment if you have NVIDIA GPU
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Open WebUI for Ollama Interface
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    ports:
+      - "8080:8080"
+    volumes:
+      - open-webui_data:/app/backend/data
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - WEBUI_SECRET_KEY=your-secret-key-here
+    depends_on:
+      - ollama
+    networks:
+      - ai-network
+    restart: unless-stopped
+
+  # Stable Diffusion WebUI for Image Generation
+  stable-diffusion-webui:
+    image: ghcr.io/abdbarho/stable-diffusion-webui-docker/auto:latest
+    ports:
+      - "7860:7860"
+    volumes:
+      - stable_diffusion_models:/app/models
+      - stable_diffusion_outputs:/app/outputs
+    environment:
+      - CLI_ARGS=--allow-code --medvram --xformers --enable-insecure-extension-access --api
+    networks:
+      - ai-network
+    restart: unless-stopped
+    # Uncomment if you have NVIDIA GPU
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # Whisper API for Speech-to-Text
+  whisper-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.whisper
+    ports:
+      - "5001:5001"
+    volumes:
+      - whisper_models:/app/models
+    networks:
+      - ai-network
+    restart: unless-stopped
+    # Uncomment if you have NVIDIA GPU
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   # Redis for Caching and Rate Limiting
   redis:
@@ -117,6 +176,14 @@ volumes:
   ollama_data:
     driver: local
   redis_data:
+    driver: local
+  open-webui_data:
+    driver: local
+  stable_diffusion_models:
+    driver: local
+  stable_diffusion_outputs:
+    driver: local
+  whisper_models:
     driver: local
 
 networks:

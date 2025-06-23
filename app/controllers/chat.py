@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify, Response, render_template, redire
 from flask_login import login_required, current_user
 import json
 import asyncio
+import requests
+import os
 from datetime import datetime, timezone
 
 from app.models.user import User, ChatSession, UsageLog, db
@@ -326,6 +328,135 @@ def export_chat_session(session_id):
                 'Content-Disposition': f'attachment; filename=chat_session_{session_id}.json'
             }
         )
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@chat.route('/api/audio/transcribe', methods=['POST'])
+@login_required
+def transcribe_audio():
+    """Transcribe audio using Whisper API"""
+    try:
+        if 'audio' not in request.files:
+            return jsonify({'error': 'No audio file provided'}), 400
+        
+        audio_file = request.files['audio']
+        
+        # Forward to Whisper API
+        whisper_url = 'http://whisper-api:5001/transcribe'
+        files = {'audio': (audio_file.filename, audio_file.stream, audio_file.content_type)}
+        
+        response = requests.post(whisper_url, files=files, timeout=30)
+        
+        if response.status_code == 200:
+            return jsonify(response.json())
+        else:
+            return jsonify({'error': 'Transcription failed'}), 500
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@chat.route('/api/image/generate', methods=['POST'])
+@login_required
+def generate_image():
+    """Generate image using Stable Diffusion API"""
+    try:
+        data = request.json
+        prompt = data.get('prompt', '').strip()
+        
+        if not prompt:
+            return jsonify({'error': 'No prompt provided'}), 400
+        
+        # Check if user has budget for image generation (approximate cost)
+        image_cost = 0.05  # Approximate cost per image
+        if not current_user.has_budget_available(image_cost):
+            return jsonify({'error': 'Insufficient budget for image generation'}), 403
+        
+        # Forward to Stable Diffusion API
+        sd_url = 'http://stable-diffusion-webui:7860/sdapi/v1/txt2img'
+        
+        payload = {
+            "prompt": prompt,
+            "negative_prompt": "blur, low quality, distorted",
+            "steps": 20,
+            "sampler_index": "Euler a",
+            "width": 512,
+            "height": 512,
+            "cfg_scale": 7,
+            "batch_size": 1,
+            "n_iter": 1,
+        }
+        
+        response = requests.post(sd_url, json=payload, timeout=120)
+        
+        if response.status_code == 200:
+            result = response.json()
+            
+            # Add usage cost
+            current_user.add_usage(image_cost)
+            
+            # Log usage
+            UsageLog.log_usage(
+                user_id=current_user.id,
+                model_name='stable-diffusion',
+                provider='local',
+                cost=image_cost,
+                status='success'
+            )
+            
+            return jsonify({
+                'success': True,
+                'images': result.get('images', []),
+                'prompt': prompt,
+                'cost': image_cost
+            })
+        else:
+            return jsonify({'error': 'Image generation failed'}), 500
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@chat.route('/api/services/status')
+@login_required
+def get_services_status():
+    """Check status of all AI services"""
+    try:
+        services = {
+            'ollama': False,
+            'whisper': False,
+            'stable_diffusion': False,
+            'open_webui': False
+        }
+        
+        # Check Ollama
+        try:
+            response = requests.get('http://ollama:11434/api/tags', timeout=5)
+            services['ollama'] = response.status_code == 200
+        except:
+            pass
+        
+        # Check Whisper API
+        try:
+            response = requests.get('http://whisper-api:5001/health', timeout=5)
+            services['whisper'] = response.status_code == 200
+        except:
+            pass
+        
+        # Check Stable Diffusion
+        try:
+            response = requests.get('http://stable-diffusion-webui:7860/internal/ping', timeout=5)
+            services['stable_diffusion'] = response.status_code == 200
+        except:
+            pass
+        
+        # Check Open WebUI
+        try:
+            response = requests.get('http://open-webui:8080/health', timeout=5)
+            services['open_webui'] = response.status_code == 200
+        except:
+            pass
+        
+        return jsonify({'services': services})
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500 

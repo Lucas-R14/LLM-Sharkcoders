@@ -1,11 +1,149 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat - AI Platform</title>
+    <title>AI Chat - Plataforma de IA</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .chat-tools {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .tool-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .tool-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .tool-btn.active {
+            background: #4CAF50;
+        }
+        
+        .service-status {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #f44336;
+        }
+        
+        .status-dot.online {
+            background: #4CAF50;
+        }
+        
+        .audio-controls {
+            display: none;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .audio-controls.active {
+            display: flex;
+        }
+        
+        .record-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 50%;
+            background: #f44336;
+            color: white;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .record-btn.recording {
+            background: #ff9800;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .image-preview {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        .image-mode {
+            display: none;
+        }
+        
+        .image-mode.active {
+            display: block;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .external-link {
+            display: inline-block;
+            margin: 5px 10px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .external-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding-top: 80px;">
     <!-- Navigation -->
@@ -13,7 +151,7 @@
         <div class="nav-container">
             <div class="nav-logo">
                 <i class="fas fa-robot"></i>
-                <span>AI Platform</span>
+                <span>Plataforma de IA</span>
             </div>
             <div class="nav-menu">
                 <a href="{{ url_for('dashboard') }}" class="nav-link">
@@ -23,7 +161,7 @@
                 <span class="nav-link">{{ username }}</span>
                 <a href="{{ url_for('auth.logout') }}" class="nav-btn">
                     <i class="fas fa-sign-out-alt"></i>
-                    Logout
+                    Sair
                 </a>
             </div>
         </div>
@@ -31,28 +169,95 @@
 
     <div class="chat-container">
         <div class="chat-header">
-            <h2><i class="fas fa-robot"></i> AI Chat Assistant</h2>
-            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i>
-                Back to Dashboard
-            </a>
+            <h2><i class="fas fa-robot"></i> Assistente de IA Completo</h2>
+            <div class="external-links">
+                <a href="http://localhost:8080" target="_blank" class="external-link">
+                    <i class="fas fa-external-link-alt"></i> Open WebUI
+                </a>
+                <a href="http://localhost:7860" target="_blank" class="external-link">
+                    <i class="fas fa-paint-brush"></i> Stable Diffusion
+                </a>
+            </div>
         </div>
+        
+        <!-- Status dos Serviços -->
+        <div class="service-status" id="service-status">
+            <div class="status-item">
+                <div class="status-dot" id="status-ollama"></div>
+                <span>Ollama</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot" id="status-whisper"></div>
+                <span>Whisper</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot" id="status-stable_diffusion"></div>
+                <span>Stable Diffusion</span>
+            </div>
+            <div class="status-item">
+                <div class="status-dot" id="status-open_webui"></div>
+                <span>Open WebUI</span>
+            </div>
+        </div>
+        
+        <!-- Ferramentas de Chat -->
+        <div class="chat-tools">
+            <button class="tool-btn active" onclick="setMode('text')" id="text-mode-btn">
+                <i class="fas fa-keyboard"></i> Texto
+            </button>
+            <button class="tool-btn" onclick="setMode('audio')" id="audio-mode-btn">
+                <i class="fas fa-microphone"></i> Áudio
+            </button>
+            <button class="tool-btn" onclick="setMode('image')" id="image-mode-btn">
+                <i class="fas fa-image"></i> Imagem
+            </button>
+            <button class="tool-btn" onclick="clearChat()" id="clear-btn">
+                <i class="fas fa-trash"></i> Limpar
+            </button>
+        </div>
+        
+        <!-- Controles de Áudio -->
+        <div class="audio-controls" id="audio-controls">
+            <button class="record-btn" id="record-btn" onclick="toggleRecording()">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <span id="recording-status">Clique para gravar</span>
+            <audio id="audio-playback" controls style="display: none;"></audio>
+        </div>
+        
+        <!-- Área de Chat -->
         <div id="chat-box" class="chat-box">
             <div class="chat-message ai" style="text-align: center; opacity: 0.7;">
                 <div class="chat-bubble">
                     <i class="fas fa-wave-square" style="margin-right: 0.5rem;"></i>
-                    Hello! I'm your AI assistant. How can I help you today?
+                    Olá! Sou o seu assistente de IA completo. Posso responder perguntas, transcrever áudio e gerar imagens. Como posso ajudar?
                 </div>
             </div>
         </div>
+        
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <i class="fas fa-spinner fa-spin"></i>
+            <span id="loading-text">Processando...</span>
+        </div>
+        
+        <!-- Formulário de Chat -->
         <form id="chat-form" class="chat-form">
-            <input type="text" id="user-input" placeholder="Type your message here..." autocomplete="off" required />
-            <button type="submit">
+            <input type="text" id="user-input" placeholder="Digite sua mensagem aqui..." autocomplete="off" required />
+            <div class="image-mode" id="image-mode">
+                <input type="text" id="image-prompt" placeholder="Descreva a imagem que quer gerar..." />
+                <button type="button" onclick="generateImage()" class="tool-btn">
+                    <i class="fas fa-magic"></i> Gerar Imagem
+                </button>
+            </div>
+            <button type="submit" id="send-btn">
                 <i class="fas fa-paper-plane"></i>
-                Send
+                Enviar
             </button>
         </form>
     </div>
-    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    
+    <script src="{{ url_for('static', filename='js/enhanced-chat.js') }}"></script>
 </body>
+</html> 
 </html> 

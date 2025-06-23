@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced AI Dashboard - LLM Platform</title>
+    <title>Dashboard AI - LLM Platform</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding-top: 80px;">
+<body>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
@@ -54,8 +55,8 @@
     <div class="dashboard-container">
         <!-- Welcome Section -->
         <div class="dashboard-header">
-            <h1><i class="fas fa-rocket"></i> Welcome back, {{ username }}!</h1>
-            <p>Your powerful AI hub with multiple providers and advanced features</p>
+            <h1><i class="fas fa-rocket"></i> Bem-vindo de volta, {{ username }}!</h1>
+            <p>Seu hub de IA poderoso com múltiplos provedores e recursos avançados</p>
         </div>
 
         <!-- Quick Stats Cards -->
@@ -66,11 +67,11 @@
                 </div>
                 <div class="stat-content">
                     <h3>${{ "%.2f"|format(user_stats.current_month_usage) }}</h3>
-                    <p>This Month Usage</p>
+                    <p>Uso Este Mês</p>
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width: {{ user_budget_percentage }}%"></div>
+                        <div class="progress-fill" data-width="{{ user_budget_percentage }}"></div>
                     </div>
-                    <small>${{ "%.2f"|format(user_stats.monthly_budget) }} Budget</small>
+                    <small>${{ "%.2f"|format(user_stats.monthly_budget) }} Orçamento</small>
                 </div>
             </div>
 
@@ -80,8 +81,8 @@
                 </div>
                 <div class="stat-content">
                     <h3>{{ user_stats.total_requests }}</h3>
-                    <p>Total Requests</p>
-                    <small>Last 30 days</small>
+                    <p>Total de Requisições</p>
+                    <small>Últimos 30 dias</small>
                 </div>
             </div>
 
@@ -91,8 +92,8 @@
                 </div>
                 <div class="stat-content">
                     <h3>{{ "{:,}".format(user_stats.total_tokens) }}</h3>
-                    <p>Tokens Used</p>
-                    <small>Last 30 days</small>
+                    <p>Tokens Usados</p>
+                    <small>Últimos 30 dias</small>
                 </div>
             </div>
 
@@ -102,8 +103,8 @@
                 </div>
                 <div class="stat-content">
                     <h3>{{ available_models|length }}</h3>
-                    <p>AI Providers</p>
-                    <small>Available to you</small>
+                    <p>Provedores de IA</p>
+                    <small>Disponíveis para você</small>
                 </div>
             </div>
         </div>
@@ -112,31 +113,31 @@
         <div class="dashboard-content">
             <!-- Quick Actions -->
             <div class="dashboard-section">
-                <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+                <h2><i class="fas fa-bolt"></i> Ações Rápidas</h2>
                 <div class="action-grid">
                     <a href="{{ url_for('chat.chat_page') }}" class="action-card">
                         <i class="fas fa-comment"></i>
-                        <h3>Start AI Chat</h3>
-                        <p>Chat with your preferred AI model</p>
+                        <h3>Iniciar Chat IA</h3>
+                        <p>Converse com seu modelo de IA preferido</p>
                     </a>
                     
                     <a href="{{ url_for('chat.multi_model_chat') }}" class="action-card">
                         <i class="fas fa-layer-group"></i>
-                        <h3>Compare Models</h3>
-                        <p>Test multiple AI models side by side</p>
+                        <h3>Comparar Modelos</h3>
+                        <p>Teste múltiplos modelos de IA lado a lado</p>
                     </a>
                     
                     <a href="{{ url_for('profile') }}" class="action-card">
                         <i class="fas fa-cog"></i>
-                        <h3>Settings</h3>
-                        <p>Configure your AI preferences</p>
+                        <h3>Configurações</h3>
+                        <p>Configure suas preferências de IA</p>
                     </a>
                     
                     {% if current_user.role == 'admin' %}
                     <a href="{{ url_for('admin.admin_dashboard') }}" class="action-card admin">
                         <i class="fas fa-shield-alt"></i>
-                        <h3>Admin Panel</h3>
-                        <p>Manage users and system settings</p>
+                        <h3>Painel Admin</h3>
+                        <p>Gerir usuários e configurações do sistema</p>
                     </a>
                     {% endif %}
                 </div>
@@ -144,7 +145,7 @@
 
             <!-- Available Models -->
             <div class="dashboard-section">
-                <h2><i class="fas fa-brain"></i> Your AI Models</h2>
+                <h2><i class="fas fa-brain"></i> Seus Modelos de IA</h2>
                 <div class="models-grid">
                     {% for provider, models in available_models.items() %}
                     <div class="provider-card">
@@ -173,7 +174,7 @@
                                     {% if model.cost_per_1k_tokens > 0 %}
                                         ${{ "%.4f"|format(model.cost_per_1k_tokens) }}/1k tokens
                                     {% else %}
-                                        Free (Local)
+                                        Gratuito (Local)
                                     {% endif %}
                                 </span>
                             </div>
@@ -186,7 +187,7 @@
 
             <!-- Recent Chat Sessions -->
             <div class="dashboard-section">
-                <h2><i class="fas fa-history"></i> Recent Chats</h2>
+                <h2><i class="fas fa-history"></i> Chats Recentes</h2>
                 {% if recent_sessions %}
                 <div class="chat-sessions">
                     {% for session in recent_sessions %}
@@ -194,8 +195,8 @@
                         <div class="session-info">
                             <h4>{{ session.title }}</h4>
                             <div class="session-meta">
-                                <span><i class="fas fa-clock"></i> {{ session.updated_at.strftime('%m/%d %H:%M') }}</span>
-                                <span><i class="fas fa-comments"></i> {{ session.get_messages()|length }} messages</span>
+                                <span><i class="fas fa-clock"></i> {{ session.updated_at.strftime('%d/%m %H:%M') }}</span>
+                                <span><i class="fas fa-comments"></i> {{ session.get_messages()|length }} mensagens</span>
                                 {% if session.model_used %}
                                 <span><i class="fas fa-robot"></i> {{ session.model_used }}</span>
                                 {% endif %}
@@ -203,7 +204,7 @@
                         </div>
                         <div class="session-actions">
                             <a href="{{ url_for('chat.chat_page') }}?session={{ session.id }}" class="btn btn-sm btn-primary">
-                                <i class="fas fa-play"></i> Continue
+                                <i class="fas fa-play"></i> Continuar
                             </a>
                         </div>
                     </div>
@@ -212,18 +213,92 @@
                 {% else %}
                 <div class="empty-state">
                     <i class="fas fa-comment-alt"></i>
-                    <h3>No chat sessions yet</h3>
-                    <p>Start your first AI conversation!</p>
+                    <h3>Ainda não há sessões de chat</h3>
+                    <p>Comece sua primeira conversa com IA!</p>
                     <a href="{{ url_for('chat.chat_page') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Start Chatting
+                        <i class="fas fa-plus"></i> Começar a Conversar
                     </a>
                 </div>
                 {% endif %}
             </div>
 
+            <!-- AI Services Integration -->
+            <div class="dashboard-section">
+                <h2><i class="fas fa-cogs"></i> Serviços de IA Integrados</h2>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-desktop"></i>
+                        </div>
+                        <div class="service-content">
+                            <h3>Open WebUI</h3>
+                            <p>Interface moderna para modelos Ollama</p>
+                            <div class="service-status" id="open-webui-status">
+                                <span class="status-dot offline" id="status-open_webui"></span>
+                                <span class="status-text">Verificando...</span>
+                            </div>
+                            <a href="http://localhost:8080" target="_blank" class="btn btn-primary">
+                                <i class="fas fa-external-link-alt"></i> Abrir Interface
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-paint-brush"></i>
+                        </div>
+                        <div class="service-content">
+                            <h3>Stable Diffusion</h3>
+                            <p>Geração avançada de imagens com IA</p>
+                            <div class="service-status" id="stable-diffusion-status">
+                                <span class="status-dot offline" id="status-stable_diffusion"></span>
+                                <span class="status-text">Verificando...</span>
+                            </div>
+                            <a href="http://localhost:7860" target="_blank" class="btn btn-primary">
+                                <i class="fas fa-image"></i> Gerar Imagens
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-microphone"></i>
+                        </div>
+                        <div class="service-content">
+                            <h3>Whisper API</h3>
+                            <p>Transcrição de áudio para texto</p>
+                            <div class="service-status" id="whisper-status">
+                                <span class="status-dot offline" id="status-whisper"></span>
+                                <span class="status-text">Verificando...</span>
+                            </div>
+                            <button onclick="testWhisperAPI()" class="btn btn-secondary">
+                                <i class="fas fa-volume-up"></i> Testar API
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <div class="service-content">
+                            <h3>Ollama Local</h3>
+                            <p>Modelos executando localmente</p>
+                            <div class="service-status" id="ollama-status">
+                                <span class="status-dot offline" id="status-ollama"></span>
+                                <span class="status-text">Verificando...</span>
+                            </div>
+                            <button onclick="checkOllamaModels()" class="btn btn-secondary">
+                                <i class="fas fa-list"></i> Ver Modelos
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Usage Chart -->
             <div class="dashboard-section">
-                <h2><i class="fas fa-chart-line"></i> Usage Analytics</h2>
+                <h2><i class="fas fa-chart-line"></i> Análise de Uso</h2>
                 <div class="chart-container">
                     <canvas id="usageChart"></canvas>
                 </div>
@@ -231,92 +306,13 @@
         </div>
     </div>
 
-    <script>
-        // Usage Chart
-        const ctx = document.getElementById('usageChart').getContext('2d');
-        const dailyUsage = {{ user_stats.daily_usage | tojson }};
-        
-        const labels = Object.keys(dailyUsage).sort();
-        const costData = labels.map(date => dailyUsage[date].cost);
-        const requestData = labels.map(date => dailyUsage[date].requests);
+    <!-- Dashboard Data -->
+    <div id="dashboard-data" 
+         data-daily-usage="{{ user_stats.daily_usage | tojson | safe }}"
+         data-budget-percentage="{{ user_budget_percentage }}"
+         style="display: none;"></div>
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Daily Cost ($)',
-                    data: costData,
-                    borderColor: 'rgb(75, 192, 192)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                    tension: 0.1,
-                    yAxisID: 'y'
-                }, {
-                    label: 'Daily Requests',
-                    data: requestData,
-                    borderColor: 'rgb(255, 99, 132)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                    tension: 0.1,
-                    yAxisID: 'y1'
-                }]
-            },
-            options: {
-                responsive: true,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                scales: {
-                    x: {
-                        display: true,
-                        title: {
-                            display: true,
-                            text: 'Date'
-                        }
-                    },
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Cost ($)'
-                        }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Requests'
-                        },
-                        grid: {
-                            drawOnChartArea: false,
-                        },
-                    }
-                }
-            }
-        });
-
-        // Budget warning
-        const budgetPercentage = {{ user_budget_percentage }};
-        if (budgetPercentage > 80) {
-            showBudgetWarning(budgetPercentage);
-        }
-
-        function showBudgetWarning(percentage) {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'budget-alert';
-            alertDiv.innerHTML = `
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <strong>Budget Warning:</strong> You've used ${percentage.toFixed(1)}% of your monthly budget.
-                    <button onclick="this.parentElement.parentElement.remove()" class="close-btn">×</button>
-                </div>
-            `;
-            document.querySelector('.dashboard-container').insertAdjacentElement('afterbegin', alertDiv);
-        }
-    </script>
+    <!-- Load dashboard JavaScript -->
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 </body>
 </html> 

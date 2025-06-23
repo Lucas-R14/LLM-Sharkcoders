@@ -1,0 +1,21 @@
+{
+    "html.validate.scripts": false,
+    "html.validate.styles": false,
+    "css.validate": false,
+    "javascript.validate.enable": false,
+    "emmet.includeLanguages": {
+        "jinja-html": "html",
+        "jinja2": "html"
+    },
+    "files.associations": {
+        "*.html": "jinja-html"
+    },
+    "html.customData": [
+        {
+            "version": 1.1,
+            "tags": [],
+            "attributes": [],
+            "valueSets": []
+        }
+    ]
+} 

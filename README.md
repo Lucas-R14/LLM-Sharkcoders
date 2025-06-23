@@ -41,8 +41,18 @@ Uma aplicação web **muito potente** para IA local e em nuvem, inspirada no tut
                         └─────────────────┘
                                  │
                         ┌─────────────────┐
-                        │    Ollama       │
-                        │  (Port 11434)   │
+                        │    Ollama       │──────┐
+                        │  (Port 11434)   │      │
+                        └─────────────────┘      │
+                                 │               │
+                   ┌─────────────────┐  ┌─────────────────┐
+                   │   Open WebUI    │  │ Stable Diffusion│
+                   │   (Port 8080)   │  │   (Port 7860)   │
+                   └─────────────────┘  └─────────────────┘
+                                 │
+                        ┌─────────────────┐
+                        │  Whisper API    │
+                        │   (Port 5001)   │
                         └─────────────────┘
 ```
 
@@ -64,13 +74,25 @@ cp config.env.example config.env
 
 ### 3. Execute com Docker Compose
 ```bash
+# Executar todos os serviços (requer GPU para melhor performance)
 docker-compose up -d
+
+# Ou executar apenas serviços específicos
+docker-compose up -d app litellm ollama redis          # Serviços básicos
+docker-compose up -d open-webui                        # Interface Ollama
+docker-compose up -d stable-diffusion-webui            # Geração de imagens
+docker-compose up -d whisper-api                       # Transcrição de áudio
 ```
+
+**Nota**: Os serviços que requerem GPU (Ollama, Stable Diffusion, Whisper) estão configurados para deteção automática de GPU NVIDIA. Se não tiver GPU, remova ou comente as secções `deploy.resources` no `docker-compose.yml`.
 
 ### 4. Acesse a aplicação
 - **App Principal**: http://localhost:5000
 - **LiteLLM UI**: http://localhost:4000 (admin/admin123)
 - **Ollama**: http://localhost:11434
+- **Open WebUI**: http://localhost:8080 (Interface moderna para Ollama)
+- **Stable Diffusion WebUI**: http://localhost:7860 (Geração de imagens)
+- **Whisper API**: http://localhost:5001 (Transcrição de áudio)
 
 ---
 
@@ -187,6 +209,31 @@ python app.py
 
 ---
 
+## 🎨 **Serviços Adicionais de IA**
+
+### **🌐 Open WebUI (Porta 8080)**
+Interface moderna e intuitiva para interagir com modelos Ollama:
+- **Funcionalidades**: Chat avançado, gestão de modelos, interface responsiva
+- **Acesso**: http://localhost:8080
+- **Conectividade**: Integração direta com Ollama
+
+### **🎭 Stable Diffusion WebUI (Porta 7860)**
+Geração de imagens com IA usando Stable Diffusion:
+- **Funcionalidades**: Text-to-image, image-to-image, inpainting
+- **Acesso**: http://localhost:7860
+- **Requisitos**: GPU NVIDIA recomendada (configuração automática)
+- **Modelos**: Download automático na primeira execução
+
+### **🗣️ Whisper API (Porta 5001)**
+Transcrição de áudio para texto usando Whisper.cpp:
+- **Endpoint**: `POST /transcribe`
+- **Formato**: Envio de ficheiros de áudio via form-data
+- **Modelo**: Base English (pode ser alterado)
+- **Exemplo de uso**:
+```bash
+curl -X POST -F "audio=@audio_file.wav" http://localhost:5001/transcribe
+```
+
 ## 🔒 Segurança e Privacidade
 
 ### **Funcionalidades de Segurança:**
@@ -198,6 +245,8 @@ python app.py
 
 ### **Dados Locais:**
 - Modelos Ollama rodam 100% localmente
+- Stable Diffusion executa localmente
+- Whisper API processa áudio localmente
 - Histórico de chats armazenado localmente
 - Controle total sobre seus dados
 
