@@ -7,7 +7,7 @@ auth = Blueprint('auth', __name__)
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('chat.chat_page'))
     
     if request.method == 'POST':
         username = request.form.get('username')
@@ -17,18 +17,19 @@ def login():
         user = User.query.filter_by(username=username).first()
 
         if not user or not user.check_password(password):
-            flash('Please check your login details and try again.')
+            flash('Por favor, verifique os seus dados de login e tente novamente.', 'error')
             return redirect(url_for('auth.login'))
 
         login_user(user, remember=remember)
-        return redirect(url_for('dashboard'))
+        flash(f'Bem-vindo, {user.username}!', 'success')
+        return redirect(url_for('chat.chat_page'))
 
     return render_template('login.html')
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('chat.chat_page'))
 
     if request.method == 'POST':
         username = request.form.get('username')
@@ -37,12 +38,12 @@ def register():
 
         user = User.query.filter_by(username=username).first()
         if user:
-            flash('Username already exists')
+            flash('Nome de utilizador já existe', 'error')
             return redirect(url_for('auth.register'))
 
         user = User.query.filter_by(email=email).first()
         if user:
-            flash('Email already registered')
+            flash('Email já está registado', 'error')
             return redirect(url_for('auth.register'))
 
         new_user = User(username=username, email=email)
@@ -51,6 +52,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
+        flash('Conta criada com sucesso! Por favor, faça login.', 'success')
         return redirect(url_for('auth.login'))
 
     return render_template('register.html')

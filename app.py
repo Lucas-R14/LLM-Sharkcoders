@@ -47,7 +47,7 @@ def create_app(config_name='development'):
     @app.route('/')
     def index():
         if current_user.is_authenticated:
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('chat.chat_page'))
         return render_template('index.html')
 
     @app.route('/dashboard')
@@ -55,23 +55,8 @@ def create_app(config_name='development'):
         if not current_user.is_authenticated:
             return redirect(url_for('auth.login'))
         
-        # Get user statistics and available models
-        user_stats = ai_service.get_user_usage_stats(current_user, days=30)
-        available_models = ai_service.get_available_models(current_user)
-        
-        # Get recent chat sessions
-        from app.models.user import ChatSession
-        recent_sessions = ChatSession.query.filter_by(
-            user_id=current_user.id,
-            is_active=True
-        ).order_by(ChatSession.updated_at.desc()).limit(5).all()
-        
-        return render_template('dashboard.html', 
-                             username=current_user.username,
-                             user_stats=user_stats,
-                             available_models=available_models,
-                             recent_sessions=recent_sessions,
-                             user=current_user)
+        # Redirect authenticated users to chat page
+        return redirect(url_for('chat.chat_page'))
 
     @app.route('/profile')
     def profile():
@@ -102,6 +87,11 @@ def create_app(config_name='development'):
             'timestamp': os.environ.get('TIMESTAMP', 'unknown'),
             'version': '2.0.0-enhanced'
         })
+
+    # Favicon route to prevent 404 errors
+    @app.route('/favicon.ico')
+    def favicon():
+        return '', 204
 
     # Error handlers
     @app.errorhandler(404)

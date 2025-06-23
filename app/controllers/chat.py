@@ -15,21 +15,8 @@ config = Config()
 @chat.route('/chat')
 @login_required
 def chat_page():
-    """Enhanced chat page with model selection and features"""
-    available_models = ai_service.get_available_models(current_user)
-    user_stats = ai_service.get_user_usage_stats(current_user, days=30)
-    
-    # Get recent chat sessions
-    recent_sessions = ChatSession.query.filter_by(
-        user_id=current_user.id,
-        is_active=True
-    ).order_by(ChatSession.updated_at.desc()).limit(10).all()
-    
-    return render_template('chat/advanced_chat.html',
-                         username=current_user.username,
-                         available_models=available_models,
-                         user_stats=user_stats,
-                         recent_sessions=recent_sessions)
+    """Simple chat page"""
+    return render_template('chat.html', username=current_user.username)
 
 @chat.route('/chat/multi-model')
 @login_required

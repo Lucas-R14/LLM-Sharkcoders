@@ -4,7 +4,7 @@ flask-login==0.6.3
 flask-sqlalchemy==3.1.1
 werkzeug==3.0.1
 # Enhanced AI capabilities
-litellm==1.47.0
+litellm==1.73.0
 openai>=1.45.0
 anthropic>=0.31.0
 google-generativeai>=0.7.2
