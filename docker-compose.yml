@@ -81,7 +81,9 @@ services:
 
   # Stable Diffusion WebUI for Image Generation
   stable-diffusion-webui:
-    image: ghcr.io/abdbarho/stable-diffusion-webui-docker/auto:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.stable-diffusion
     ports:
       - "7860:7860"
     volumes:
