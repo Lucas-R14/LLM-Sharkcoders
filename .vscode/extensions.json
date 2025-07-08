@@ -1,9 +1,0 @@
-{
-    "recommendations": [
-        "wholroyd.jinja",
-        "ms-python.python",
-        "ms-python.flake8",
-        "ms-python.black-formatter",
-        "bradlc.vscode-tailwindcss"
-    ]
-} 
