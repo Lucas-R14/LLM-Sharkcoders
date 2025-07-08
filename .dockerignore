@@ -1,0 +1,98 @@
+# .dockerignore
+# Arquivos a ignorar no build Docker
+
+# ====================================
+# PYTHON & VIRTUAL ENVIRONMENTS
+# ====================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# ====================================
+# DEVELOPMENT FILES
+# ====================================
+.git/
+.gitignore
+*.md
+README*
+CHANGELOG*
+.pytest_cache/
+.coverage
+.tox/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ====================================
+# IDE & EDITOR FILES
+# ====================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ====================================
+# DOCKER FILES (evitar recursão)
+# ====================================
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# ====================================
+# LOGS & TEMPORARY FILES
+# ====================================
+logs/
+*.log
+tmp/
+temp/
+*.tmp
+*.temp
+
+# ====================================
+# GENERATED DATA
+# ====================================
+generated_images/
+docker-data/
+
+# ====================================
+# ENVIRONMENT & CONFIG
+# ====================================
+.env
+.env.*
+!env.example
+
+# ====================================
+# SCRIPTS DE EXECUÇÃO
+# ====================================
+start-docker.bat
+start-docker.ps1
+*.bat
+*.ps1
+
+# ====================================
+# LARGE FILES
+# ====================================
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ====================================
+# SYSTEM FILES
+# ====================================
+.cache/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log* 

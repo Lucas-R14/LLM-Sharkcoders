@@ -1,0 +1,81 @@
+# LLM Pessoal - Requirements
+# Dependências para Docker e desenvolvimento local
+
+# ===============================
+# WEB FRAMEWORK
+# ===============================
+fastapi==0.115.14
+uvicorn[standard]==0.35.0
+jinja2==3.1.6
+
+# ===============================
+# HTTP & REQUESTS
+# ===============================
+requests==2.32.4
+httpx==0.28.1
+aiohttp==3.9.1
+
+# ===============================
+# AI & MACHINE LEARNING
+# ===============================
+# PyTorch - instalado separadamente no Dockerfile para otimização
+# torch>=2.0.0
+# torchvision>=0.15.0
+# torchaudio>=2.0.0
+
+# Diffusers para Stable Diffusion
+diffusers==0.34.0
+transformers==4.53.1
+accelerate==1.8.1
+
+# Hugging Face
+huggingface-hub==0.33.2
+safetensors==0.5.3
+tokenizers==0.21.2
+
+# ===============================
+# AUDIO PROCESSING (NOVO)
+# ===============================
+torchaudio>=2.0.0
+librosa>=0.10.0
+soundfile>=0.12.0
+pydub>=0.25.0
+ffmpeg-python>=0.2.0
+
+# ===============================
+# IMAGE PROCESSING
+# ===============================
+pillow==11.0.0
+
+# ===============================
+# DATA & VALIDATION
+# ===============================
+pydantic==2.11.7
+pydantic-core==2.33.2
+
+# ===============================
+# UTILITIES
+# ===============================
+python-multipart==0.0.6
+python-dotenv==1.0.0
+click==8.2.1
+tqdm==4.67.1
+
+# ===============================
+# SYSTEM & MONITORING
+# ===============================
+psutil==7.0.0
+
+# ===============================
+# DEVELOPMENT (opcional)
+# ===============================
+# pytest==8.3.3
+# pytest-asyncio==0.24.0
+# black==24.8.0
+# flake8==7.1.1
+# mypy==1.13.0
+
+# ===============================
+# PRODUCTION (opcional)
+# ===============================
+# gunicorn==23.0.0 
